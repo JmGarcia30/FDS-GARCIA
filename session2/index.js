@@ -40,7 +40,7 @@ let studentName = "Marry Poppins";
 
 function getName(){
     let age = 50;
-    console.log(studentName + "age is " + age);
+    console.log(studentName + " age is " + age);
 }
 
 getName();
@@ -59,3 +59,23 @@ function enterName(){
     let inputName = prompt("Please Enter Your Name");
     console.log("Hello there, " + inputName + "!")
 }
+
+
+// Parameterized Functions
+// Parameters are variable-like code. It can gather client/user inputs
+
+function FullName(name){
+    console.log("Welcome, " + name + "!");
+}
+
+// Function Invocation with argument
+FullName("Joey");
+
+function introduceYourPet(name, breed, age){
+    console.log("My pet name is " + name);
+    console.log("She is a " + breed);
+    console.log("She is " + age + " Months Old.")
+}
+
+introduceYourPet("Batching", "Puspin", 7);
+introduceYourPet("Bondat", "Puspin", 3);
