@@ -106,3 +106,9 @@ function getAverage(ave1, ave2, ave3, ave4){
 }
 
 getAverage(90, 92, 93, 95);
+
+function checkIfPassed(score, total){
+	console.log("Is passing?")
+	console.log((score/total)*100 >= 75);
+}
+checkIfPassed(75, 100);
