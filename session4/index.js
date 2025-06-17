@@ -72,7 +72,7 @@ for(let i = 0; i < myName.length; i++){
         myName[i].toLowerCase() == "o" ||
         myName[i].toLowerCase() == "u"
     ){
-        console.log("Vowel");
+
     }else{
         console.log(myName[i]);
     }
@@ -83,8 +83,8 @@ for(let i = 0; i < myName.length; i++){
 for(let x = 0; x < 50; x++){
     if(x % 2 == 0){//no remainder == 0
         continue;
-    }else if(x == 35){
-        // break;
+    }else if(x === 35){
+        break;
     }
     else {
         console.log(x)
