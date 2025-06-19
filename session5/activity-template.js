@@ -53,7 +53,7 @@ console.log(itemFound);
 */
 
 function deleteItem() {
-
+    
 }
 
 let deletedLastItem;

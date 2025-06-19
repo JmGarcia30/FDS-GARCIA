@@ -54,19 +54,3 @@ for(let i = 0; i < string.length; i++){
 }
 
 console.log(filteredString);
-
-// let myName = "AlEx";
-
-// for(let i = 0; i < myName.length; i++){
-//     if(
-//         myName[i].toLowerCase() == "a" ||
-//         myName[i].toLowerCase() == "e" ||
-//         myName[i].toLowerCase() == "i" ||
-//         myName[i].toLowerCase() == "o" ||
-//         myName[i].toLowerCase() == "u"
-//     ){
-//         console.log("Vowel");
-//     }else{
-//         console.log(myName[i]);
-//     }
-// }
