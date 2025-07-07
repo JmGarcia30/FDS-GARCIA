@@ -171,3 +171,26 @@ let concat1 = "Jane";
 let concat2 = 10;
 
 console.log(concat1 + " is " + concat2 + " Years old");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function greet(name) { 
+    return "Hello " + name; 
+}
+
+greet("jm");
