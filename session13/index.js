@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
+const cors = require("cors");
 
 const app = express();
 const port = 3000;
@@ -10,6 +11,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
 // DB Connections Settings
 const db = mysql.createConnection({
@@ -207,7 +209,7 @@ app.post("/users/register", async (req, res) => {
 
         if (result.length > 0) {
             res.send({
-                code: 1,
+                code: 2,
                 codeMessage: "user-already-existing",
                 details: "The email you provided was already registered."
             })
