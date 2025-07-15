@@ -5,15 +5,15 @@ const bcrypt = require("bcryptjs");
 const cors = require("cors");
 
 const app = express();
-const port = 3000;
+const port = 4000;
 
-// Middlewares
+// middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended:true}));
 app.use(bodyParser.json());
 app.use(cors());
 
-// DB Connections Settings
+// DB Connection Settings
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -21,39 +21,39 @@ const db = mysql.createConnection({
     database: "task_management"
 })
 
-// DB Con Confirmation message
+// DB Con confirmation message
 db.connect(err => {
-    if (err) {
+    if(err){
         console.log("Error connecting in MySQL Database.");
-    } else {
-        console.log("MySQL Database Connection is succesful!");
+    }else{
+        console.log("MySQL Database Connection is Successful!");
     }
 })
 
-
+// Routes
 // Get All Task
 app.get("/tasks/all", (req, res) => {
     const sql = "SELECT * FROM tasks";
 
     db.query(sql, (err, result) => {
-        if (err) {
+        if(err){
             res.send({
                 code: 0,
                 codeMessage: "server-error",
                 details: "There is a problem while retrieving all tasks."
             });
             return;
-        } else {
-            if (result.length <= 0) {
+        }else{
+            if(result.length <= 0){
                 res.send({
                     code: 1,
                     codeMessage: "no-task-found",
                     details: "Task table in the database is empty."
                 })
-            } else {
+            }else{
                 res.json({
                     code: 1,
-                    codeMessage: "task-retrieved",
+                    codeMessage: "tasks-retrieved",
                     details: result
                 });
             }
@@ -64,19 +64,21 @@ app.get("/tasks/all", (req, res) => {
 
 // Add new task
 app.post("/tasks/create", (req, res) => {
-    let { taskName, taskDescription, isActive, taskCreated, user_id } = req.body;
+    let {taskName, taskDescription, isActive, taskCreated, user_id} = req.body;
 
-    const sql = `INSERT INTO tasks(taskName, taskDescription, isActive, taskCreated, taskCompleted, user_id) VALUES(?, ?, ?, ?, taskCompleted, ?)`;
+    const sql = 
+    `INSERT INTO tasks(taskName, taskDescription, isActive, taskCreated, taskCompleted, user_id) VALUES (?, ?, ?, ?, taskCompleted, ?)`;
 
-    db.query(sql, [taskName, taskDescription, isActive = 1, taskCreated = new Date, user_id = 1], (err, result) => {
-        if (err) {
+    db.query(sql, 
+        [taskName, taskDescription, isActive = 1, taskCreated = new Date(), user_id = 1], (err, result) => {
+        if(err){
             res.send({
                 code: 0,
                 codeMessage: "server-error",
-                details: "There is a problem while adding the tasks."
+                details: "There is a problem while adding the task."
             });
             return;
-        } else {
+        }else{
             res.send({
                 code: 1,
                 codeMessage: "task-added",
@@ -87,20 +89,20 @@ app.post("/tasks/create", (req, res) => {
 })
 
 
-// Get specific task -> using task_id
+// Get Specific Task -> using tasks_id
 app.get("/tasks/:taskId", (req, res) => {
-    const id = req.params.taskId
-    const sql = `SELECT * FROM tasks WHERE task_id = ?`
+    const id = req.params.taskId;
+    const sql = `SELECT * FROM tasks WHERE task_id = ?`;
 
     db.query(sql, [id], (err, result) => {
-        if (err || result.length <= 0) {
+        if(err || result.length <= 0){
             res.send({
                 code: 0,
                 codeMessage: "task-not-found",
                 details: "Cannot find the task with the provided ID."
-            })
+            });
             return;
-        } else {
+        }else{
             res.json({
                 code: 1,
                 codeMessage: "task-found",
@@ -110,21 +112,21 @@ app.get("/tasks/:taskId", (req, res) => {
     })
 })
 
+//Complete Specific Task
 
-// Update task
 app.put("/tasks/complete/:taskId", (req, res) => {
-    const id = req.params.taskId
-    const sql = `UPDATE tasks SET isActive = ? , taskCompleted = ? WHERE task_id = ?`
+    const id = req.params.taskId;
+    const sql = `UPDATE tasks SET isActive = ?, taskCompleted = ? WHERE task_id = ?`;
 
-    db.query(sql, [isActive = 0, taskCompleted = new Date, id], (err, result) => {
-        if (err || result.length <= 0) {
+    db.query(sql, [isActive = 0, taskCompleted = new Date(), id], (err, result) => {
+        if(err || result.length <= 0){
             res.send({
                 code: 0,
                 codeMessage: "task-not-found",
                 details: "Task cannot be updated or the task is not found."
-            })
+            });
             return;
-        } else {
+        }else{
             res.send({
                 code: 1,
                 codeMessage: "task-completed",
@@ -143,52 +145,50 @@ app.delete("/tasks/delete/:taskId", (req, res) => {
     const check = "SELECT * FROM tasks WHERE task_id = ?"
 
     db.query(check, [id], (err, result) => {
-        if (err) {
+        if(err){
             res.send({
                 code: 0,
                 codeMessage: "task-not-found",
                 details: "The task cannot be deleted or the task is not found"
             });
             return;
-        } else {
-            if (result.length <= 0) {
+        }else{
+            if(result.length <= 0) {
                 res.send({
-                    code: 0,
-                    codeMessage: "task-not-found",
-                    details: "The task cannot be deleted or the task is not found"
-                });
-            } else {
+                        code: 0,
+                        codeMessage: "task-not-found",
+                        details: "The task cannot be deleted or the task is not found"
+                    });
+            }else{
                 db.query(sql, [id], (err, result) => {
-                    if (err) {
-                        res.send({
-                            code: 0,
-                            codeMessage: "task-not-found",
-                            details: "The task cannot be deleted or the task is not found"
-                        });
-                        return;
-                    } else {
-                        res.send({
-                            code: 1,
-                            codeMessage: "task-deleted",
-                            details: "The was deleted successfully!"
-                        });
-                        console.log(result);
-                    }
-                })
+                if(err){
+                    res.send({
+                        code: 0,
+                        codeMessage: "task-not-found",
+                        details: "The task cannot be deleted or the task is not found"
+                    });
+                    return;
+                }else{
+                    res.send({
+                        code: 1,
+                        codeMessage: "task-deleted",
+                        details: "The was deleted successfully!"
+                    });
+                    console.log(result);
+                }
+            })
             }
         }
     })
 })
 
-
-
-// User Routes
+// USER ROUTES
 
 // User sign up
 app.post("/users/register", async (req, res) => {
-    const { fname, mname, lname, email, pass } = req.body;
+    const {fname, mname, lname, email, pass} = req.body;
 
-    if (!fname || !mname || !lname || !email || !pass) {
+    if(!fname || !mname || !lname || !email || !pass){
         res.send({
             code: 0,
             codeMessage: "some-fields-empty",
@@ -199,33 +199,33 @@ app.post("/users/register", async (req, res) => {
     const check = "SELECT * FROM users WHERE email = ?";
 
     db.query(check, [email], async (err, result) => {
-        if (err) {
+        if(err){
             res.send({
-                code: 0,
-                codeMessage: "server-error",
-                details: "Cannot accept your registration at the moment."
-            })
+            code: 0,
+            codeMessage: "server-error",
+            details: "Cannot accept your registration at the moment."
+        })
         }
 
-        if (result.length > 0) {
+        if(result.length > 0){
             res.send({
                 code: 2,
                 codeMessage: "user-already-existing",
                 details: "The email you provided was already registered."
             })
-        } else {
+        }else{
             const hashedPassword = await bcrypt.hash(pass, 10);
 
             const sql = "INSERT INTO users(fname, mname, lname, email, pass) VALUES (?, ?, ?, ? ,?)";
 
             db.query(sql, [fname, mname, lname, email, hashedPassword], (err, result) => {
-                if (err) {
+                if(err){
                     res.send({
-                        code: 0,
-                        codeMessage: "server-error",
-                        details: "Cannot accept your registration at the moment."
+                    code: 0,
+                    codeMessage: "server-error",
+                    details: "Cannot accept your registration at the moment."
                     })
-                } else {
+                }else{
                     res.json({
                         code: 1,
                         codeMessage: "registration-success",
@@ -233,7 +233,7 @@ app.post("/users/register", async (req, res) => {
                     })
                 }
             })
-        }
+        }  
 
     })
 })
@@ -241,37 +241,38 @@ app.post("/users/register", async (req, res) => {
 // User Auth/Login
 
 app.post("/users/login", (req, res) => {
-    const { email, pass } = req.body;
-    const sql = "SELECT * FROM users WHERE email = ?"
+    const {email, pass} = req.body;
+    const sql = "SELECT * FROM users WHERE email = ?";
 
     db.query(sql, email, async (err, result) => {
-        if (err) {
+        if(err){
             res.send({
                 code: 0,
                 codeMessage: "server-error",
                 details: "There is a problem with your request. Please try again."
             })
-        } else if (result.length <= 0) {
+        }else if(result.length <= 0){
             res.send({
-                code: 1,
+                code: 3,
                 codeMessage: "user-not-found",
                 details: "The email provided is not registered."
             })
-        } else {
+        }else{
             const user = result[0];
             const isMatched = await bcrypt.compare(pass, user.pass);
 
-            if (!isMatched) {
+            if(!isMatched){
                 res.send({
-                    code: 1,
-                    codeMessage: "error-details",
-                    details: "The email or password is incorrect."
+                code: 2,
+                codeMessage: "error-details",
+                details: "The email or password is incorrect."
                 })
-            } else {
+            }else{
                 res.send({
-                    code: 1,
-                    codeMessage: "login-success",
-                    details: `welcome to UTask, ${user.fname} ${user.lname}!`
+                code: 1,
+                codeMessage: "login-success",
+                details: `Welcome to UTask, ${user.fname} ${user.lname}!`,
+                user_data: result[0]
                 })
             }
         }
@@ -279,5 +280,7 @@ app.post("/users/login", (req, res) => {
 })
 
 
-// Port Listening
-app.listen(port, () => console.log(`Server is now up and running at port ${port}.`));
+
+
+
+app.listen(port, () => console.log(`Server is running at port ${port}.`));
