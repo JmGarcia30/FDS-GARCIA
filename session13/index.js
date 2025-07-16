@@ -77,7 +77,7 @@ app.post("/tasks/create", (req, res) => {
         `INSERT INTO tasks(taskName, taskDescription, isActive, taskCreated, user_id) VALUES (?, ?, ?, ?, ?)`;
 
     db.query(sql,
-        [taskName, taskDescription, isActive = 1, taskCreated = new Date(), user_id = 11], (err, result) => {
+        [taskName, taskDescription, isActive, taskCreated, user_id], (err, result) => {
             if (err) {
                 console.error("SQL Error:", err);
                 res.send({
@@ -186,6 +186,84 @@ app.delete("/tasks/delete/:user_id/:taskId", (req, res) => {
     });
 });
 
+
+// Update Task (by user)
+app.put("/tasks/update/:user_id/:taskId", (req, res) => {
+    const { user_id, taskId } = req.params;
+    const { taskName, taskDescription } = req.body;
+
+    if (!taskName || !taskDescription) {
+        return res.send({
+            code: 0,
+            codeMessage: "missing-fields",
+            details: "Task name and description are required."
+        });
+    }
+
+    const sql = `UPDATE tasks SET taskName = ?, taskDescription = ? WHERE task_id = ? AND user_id = ?`;
+
+    db.query(sql, [taskName, taskDescription, taskId, user_id], (err, result) => {
+        if (err) {
+            return res.send({
+                code: 0,
+                codeMessage: "update-failed",
+                details: "There was an error while updating the task.",
+                error: err
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.send({
+                code: 2,
+                codeMessage: "task-not-found",
+                details: "No task was found to update."
+            });
+        }
+
+        return res.send({
+            code: 1,
+            codeMessage: "task-updated",
+            details: "The task has been successfully updated."
+        });
+    });
+});
+
+// Change Password
+app.put('/users/change-password/:user_id', (req, res) => {
+    const { user_id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.json({ code: 0, details: 'All fields are required.' });
+    }
+
+    const sql = 'SELECT pass FROM users WHERE user_id = ?';
+    db.query(sql, [user_id], (err, result) => {
+        if (err) return res.json({ code: 0, details: 'Database error.' });
+        if (result.length === 0) return res.json({ code: 0, details: 'User not found.' });
+
+        const hashedPassword = result[0].pass; 
+
+        
+        bcrypt.compare(currentPassword, hashedPassword, (err, isMatch) => {
+            if (err) return res.json({ code: 0, details: 'Error verifying password.' });
+            if (!isMatch) return res.json({ code: 0, details: 'Current password is incorrect.' });
+
+            bcrypt.hash(newPassword, 10, (err, newHashed) => {
+                if (err) return res.json({ code: 0, details: 'Error hashing new password.' });
+
+                const updateSql = 'UPDATE users SET pass = ? WHERE user_id = ?'; 
+                db.query(updateSql, [newHashed, user_id], (err) => {
+                    if (err) return res.json({ code: 0, details: 'Error updating password.' });
+
+                    return res.json({ code: 1, details: 'Password updated successfully.' });
+                });
+            });
+        });
+    });
+});
+
+
 // USER ROUTES
 
 // User sign up
@@ -288,6 +366,49 @@ app.post("/users/login", (req, res) => {
         }
     })
 })
+
+
+
+// Update user profile (name fields only)
+app.put("/users/update/:id", (req, res) => {
+    const { id } = req.params;
+    const { fname, mname, lname } = req.body;
+
+    if (!fname || !mname || !lname) {
+        return res.send({
+            code: 0,
+            codeMessage: "missing-fields",
+            details: "All name fields are required."
+        });
+    }
+
+    const sql = "UPDATE users SET fname = ?, mname = ?, lname = ? WHERE user_id = ?";
+    db.query(sql, [fname, mname, lname, id], (err, result) => {
+        if (err) {
+            return res.send({
+                code: 0,
+                codeMessage: "update-failed",
+                details: "Something went wrong while updating your profile.",
+                error: err
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.send({
+                code: 2,
+                codeMessage: "user-not-found",
+                details: "No user found to update."
+            });
+        }
+
+        return res.send({
+            code: 1,
+            codeMessage: "profile-updated",
+            details: "Your profile has been updated successfully."
+        });
+    });
+});
+
 
 function toMySQLDateTime(jsDate) {
     const pad = n => n < 10 ? '0' + n : n;
